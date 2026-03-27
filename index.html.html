@@ -888,7 +888,7 @@ body.sidebar-collapsed .sidebar-float-toggle {
 // CONFIG
 // ════════════════════════════════════════════
 const SHEET_ID   = '1sdl_QuPnK4f9Mra8Ij19fFD3kIoSoTKsLaLS2x9ZMN8';
-const SCRIPT_URL = 'https://script.google.com/macros/s/TU_ID/exec';
+const SCRIPT_URL = 'https://script.google.com/a/macros/orien.com.ar/s/AKfycbzCpcHWWBd9Msv-EK2_nxJ8GYVaG31itcUWLKJ_wxI0TDW5gSQn4Wce7scR-Q4D5uRwHA/exec';
 
 // ════════════════════════════════════════════
 // LOGIN
@@ -1145,7 +1145,7 @@ function exportCSV(){
 // REAL DATA LOADER — conecta con Apps Script
 // ════════════════════════════════════════════
 async function loadData() {
-  if (!SCRIPT_URL || SCRIPT_URL === 'TU_APPS_SCRIPT_URL_AQUI') {
+  if (!SCRIPT_URL || SCRIPT_URL === 'https://script.google.com/a/macros/orien.com.ar/s/AKfycbzCpcHWWBd9Msv-EK2_nxJ8GYVaG31itcUWLKJ_wxI0TDW5gSQn4Wce7scR-Q4D5uRwHA/exec') {
     // Modo demo: sin URL configurada
     loadDemo();
     return;
@@ -1320,7 +1320,7 @@ function syncData() {
 
 // Override savePedido para guardar en Sheet
 async function savePedidoToSheet(sku, resp, stockActual, pedidoFinal) {
-  if (!SCRIPT_URL || SCRIPT_URL === 'TU_APPS_SCRIPT_URL_AQUI') return;
+  if (!SCRIPT_URL || SCRIPT_URL === 'https://script.google.com/a/macros/orien.com.ar/s/AKfycbzCpcHWWBd9Msv-EK2_nxJ8GYVaG31itcUWLKJ_wxI0TDW5gSQn4Wce7scR-Q4D5uRwHA/exec') return;
   try {
     await fetch(SCRIPT_URL, {
       method: 'POST',
