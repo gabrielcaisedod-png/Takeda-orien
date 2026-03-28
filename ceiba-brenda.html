@@ -1,0 +1,840 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Ceiba · Mi Salud</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --ink:     #0c1c17;
+  --ink2:    #111f1a;
+  --jade:    #1e6b52;
+  --jade2:   #28a07a;
+  --jade3:   #4dc99a;
+  --jade-gl: rgba(30,107,82,.14);
+  --gold:    #c8a96a;
+  --gold2:   #f0d48a;
+  --gold-gl: rgba(200,169,106,.1);
+  --rose:    #e07a7a;
+  --blue:    #5a9fd4;
+  --blue-gl: rgba(90,159,212,.1);
+  --glass:   rgba(255,255,255,.04);
+  --glass2:  rgba(255,255,255,.065);
+  --glass3:  rgba(255,255,255,.09);
+  --border:  rgba(255,255,255,.09);
+  --border2: rgba(255,255,255,.055);
+  --txt:     #e4ddd0;
+  --txt2:    #8fa898;
+  --txt3:    #4a6a58;
+  --r:       22px;
+  --r2:      16px;
+  --r3:      11px;
+  --tab-h:   72px;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+html,body{height:100%;}
+body{
+  font-family:'Plus Jakarta Sans',sans-serif;
+  background:var(--ink);
+  display:flex;justify-content:center;
+  overflow:hidden;
+}
+.amb1,.amb2{position:fixed;border-radius:50%;pointer-events:none;z-index:0;}
+.amb1{top:-160px;right:-100px;width:480px;height:480px;background:radial-gradient(circle,rgba(30,107,82,.18) 0%,transparent 65%);}
+.amb2{bottom:60px;left:-160px;width:400px;height:400px;background:radial-gradient(circle,rgba(200,169,106,.07) 0%,transparent 65%);}
+
+.app{width:100%;max-width:430px;height:100%;display:flex;flex-direction:column;position:relative;z-index:1;overflow:hidden;}
+
+.content{flex:1;overflow-y:auto;overflow-x:hidden;padding-bottom:calc(var(--tab-h) + 8px);-webkit-overflow-scrolling:touch;}
+.content::-webkit-scrollbar{width:2px;}
+.content::-webkit-scrollbar-thumb{background:var(--jade);border-radius:2px;}
+
+/* ── TAB BAR ── */
+.tabbar{
+  position:fixed;bottom:0;left:50%;transform:translateX(-50%);
+  width:100%;max-width:430px;height:var(--tab-h);
+  background:rgba(10,24,18,.94);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);
+  border-top:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-around;
+  padding:0 8px;z-index:100;
+}
+.tab{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;cursor:pointer;padding:8px 4px 12px;transition:all .22s;position:relative;border:none;background:none;}
+.tab-icon{font-size:22px;transition:transform .25s;line-height:1;}
+.tab-lbl{font-size:10px;font-weight:600;letter-spacing:.06em;color:var(--txt3);transition:color .22s;text-transform:uppercase;}
+.tab.active .tab-lbl{color:var(--jade3);}
+.tab.active .tab-icon{transform:translateY(-2px);}
+.tab-pip{position:absolute;bottom:6px;width:4px;height:4px;border-radius:50%;background:var(--jade3);opacity:0;transition:opacity .22s;box-shadow:0 0 6px rgba(77,201,154,.6);}
+.tab.active .tab-pip{opacity:1;}
+
+/* ── VIEWS ── */
+.view{display:none;}
+.view.active{display:block;animation:fadeUp .3s cubic-bezier(.4,0,.2,1);}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+
+/* ═══════════════════════════
+   HOME — REDISEÑADO
+═══════════════════════════ */
+.home-top{
+  padding:54px 24px 28px;
+  display:flex;align-items:center;justify-content:space-between;
+}
+.home-greet{
+  font-size:12px;font-weight:600;letter-spacing:.12em;
+  text-transform:uppercase;color:var(--txt3);margin-bottom:4px;
+}
+.home-name{
+  font-family:'Playfair Display',serif;
+  font-size:26px;font-weight:700;color:var(--txt);line-height:1.1;
+}
+.home-name em{font-style:italic;color:var(--jade3);}
+.notif-btn{
+  width:42px;height:42px;border-radius:13px;
+  background:var(--glass2);border:1px solid var(--border);
+  display:flex;align-items:center;justify-content:center;
+  font-size:18px;cursor:pointer;flex-shrink:0;position:relative;
+}
+.notif-dot{position:absolute;top:9px;right:9px;width:7px;height:7px;border-radius:50%;background:var(--rose);border:1.5px solid var(--ink);}
+
+/* PRÓXIMO TURNO — hero card */
+.hero-card{
+  margin:0 20px 28px;
+  background:linear-gradient(145deg, #1a5c46 0%, #22896a 60%, #2aab80 100%);
+  border-radius:var(--r);
+  padding:22px 22px 20px;
+  position:relative;overflow:hidden;
+  box-shadow:0 8px 32px rgba(20,90,65,.45);
+}
+.hero-card::before{
+  content:'';position:absolute;top:-50px;right:-50px;
+  width:180px;height:180px;border-radius:50%;
+  background:rgba(255,255,255,.06);
+}
+.hero-card::after{
+  content:'';position:absolute;bottom:-30px;left:20px;
+  width:120px;height:120px;border-radius:50%;
+  background:rgba(255,255,255,.03);
+}
+.hero-tag{
+  font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;
+  color:rgba(255,255,255,.55);margin-bottom:14px;display:block;position:relative;z-index:1;
+}
+.hero-doc{
+  font-family:'Playfair Display',serif;
+  font-size:22px;font-weight:700;color:#fff;
+  margin-bottom:3px;position:relative;z-index:1;line-height:1.2;
+}
+.hero-esp{font-size:13px;color:rgba(255,255,255,.6);margin-bottom:18px;position:relative;z-index:1;}
+.hero-chips{display:flex;gap:8px;margin-bottom:18px;position:relative;z-index:1;flex-wrap:wrap;}
+.hero-chip{
+  display:flex;align-items:center;gap:5px;
+  background:rgba(0,0,0,.18);border:1px solid rgba(255,255,255,.15);
+  border-radius:20px;padding:6px 12px;
+  font-size:12px;font-weight:600;color:rgba(255,255,255,.9);
+}
+.hero-actions{display:flex;gap:8px;position:relative;z-index:1;}
+.hero-btn{
+  flex:1;padding:11px;border-radius:var(--r3);
+  font-family:'Plus Jakarta Sans',sans-serif;
+  font-size:12.5px;font-weight:700;cursor:pointer;border:none;
+  transition:all .2s;letter-spacing:.02em;
+}
+.hero-btn-p{background:rgba(255,255,255,.18);color:#fff;border:1px solid rgba(255,255,255,.25);}
+.hero-btn-g{background:rgba(0,0,0,.18);color:rgba(255,255,255,.55);border:1px solid rgba(255,255,255,.1);}
+.hero-empty{
+  margin:0 20px 28px;
+  background:var(--glass2);border:1.5px dashed var(--border);
+  border-radius:var(--r);padding:28px 22px;text-align:center;
+}
+.hero-empty-icon{font-size:36px;margin-bottom:10px;}
+.hero-empty-t{font-size:15px;font-weight:600;color:var(--txt);margin-bottom:5px;}
+.hero-empty-s{font-size:13px;color:var(--txt2);margin-bottom:18px;}
+
+/* CARDS GRID */
+.cards-grid{
+  display:grid;grid-template-columns:1fr 1fr;
+  gap:12px;padding:0 20px;margin-bottom:28px;
+}
+.nav-card{
+  background:var(--glass2);border:1px solid var(--border2);
+  border-radius:var(--r2);padding:18px 16px;
+  cursor:pointer;transition:all .22s;position:relative;overflow:hidden;
+  display:flex;flex-direction:column;justify-content:space-between;
+  min-height:110px;
+}
+.nav-card:active{transform:scale(.96);}
+.nav-card::after{
+  content:'';position:absolute;bottom:0;right:0;
+  width:60px;height:60px;border-radius:50%;
+  background:rgba(255,255,255,.025);transform:translate(20px,20px);
+}
+.nav-card-icon{font-size:26px;margin-bottom:10px;}
+.nav-card-title{font-size:14px;font-weight:700;color:var(--txt);line-height:1.3;}
+.nav-card-sub{font-size:11.5px;color:var(--txt2);margin-top:3px;}
+.nav-card-badge{
+  position:absolute;top:12px;right:12px;
+  min-width:20px;height:20px;border-radius:10px;
+  background:var(--rose);color:#fff;
+  font-size:10px;font-weight:800;
+  display:flex;align-items:center;justify-content:center;
+  padding:0 5px;
+}
+.nav-card.accent-jade{background:rgba(30,107,82,.2);border-color:rgba(40,160,122,.25);}
+.nav-card.accent-gold{background:rgba(200,169,106,.08);border-color:rgba(200,169,106,.18);}
+.nav-card.accent-blue{background:rgba(90,159,212,.08);border-color:rgba(90,159,212,.18);}
+
+/* ÚLTIMA NOVEDAD (1 sola) */
+.single-news{
+  margin:0 20px 20px;
+  background:var(--glass2);border:1px solid var(--border2);
+  border-radius:var(--r2);padding:15px 16px;
+  display:flex;align-items:center;gap:13px;cursor:pointer;
+}
+.sn-icon{font-size:22px;flex-shrink:0;}
+.sn-tag{font-size:9.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;margin-bottom:3px;}
+.sn-tag.promo{color:var(--gold);}
+.sn-tag.info{color:var(--blue);}
+.sn-tag.alert{color:var(--rose);}
+.sn-text{font-size:13px;font-weight:500;color:var(--txt);line-height:1.4;}
+.sn-arrow{color:var(--txt3);font-size:18px;flex-shrink:0;}
+
+/* ═══════════════════════════
+   TURNOS
+═══════════════════════════ */
+.page-hdr{padding:52px 22px 18px;display:flex;align-items:flex-end;justify-content:space-between;}
+.page-title{font-family:'Playfair Display',serif;font-size:28px;font-weight:700;color:var(--txt);}
+.page-title em{font-style:italic;color:var(--jade3);}
+.btn-new{
+  background:linear-gradient(135deg,var(--jade),var(--jade2));
+  color:#fff;border:none;border-radius:var(--r3);padding:10px 16px;
+  font-family:'Plus Jakarta Sans',sans-serif;font-size:12.5px;font-weight:700;
+  cursor:pointer;letter-spacing:.03em;
+  box-shadow:0 4px 14px rgba(30,107,82,.35);white-space:nowrap;transition:all .2s;
+}
+.filter-row{display:flex;gap:8px;padding:0 22px;margin-bottom:16px;overflow-x:auto;scrollbar-width:none;}
+.filter-row::-webkit-scrollbar{display:none;}
+.fchip{flex-shrink:0;padding:7px 14px;border-radius:20px;font-size:12px;font-weight:600;cursor:pointer;transition:all .2s;background:var(--glass2);border:1px solid var(--border2);color:var(--txt2);white-space:nowrap;}
+.fchip.active{background:var(--jade-gl);color:var(--jade3);border-color:rgba(40,160,122,.3);}
+
+.turno-item{background:var(--glass);border:1px solid var(--border2);border-radius:var(--r2);padding:15px 16px;margin-bottom:10px;display:flex;align-items:center;gap:13px;cursor:pointer;transition:all .2s;position:relative;overflow:hidden;}
+.turno-item::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:transparent;}
+.turno-item.upcoming::before{background:var(--jade2);}
+.turno-item.past::before{background:var(--txt3);}
+.turno-item.cancelled::before{background:var(--rose);}
+.ti-date{min-width:44px;text-align:center;flex-shrink:0;}
+.ti-day{font-size:22px;font-weight:800;color:var(--txt);line-height:1;}
+.ti-mon{font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--txt3);}
+.ti-sep{width:1px;height:36px;background:var(--border2);flex-shrink:0;}
+.ti-info{flex:1;min-width:0;}
+.ti-doc{font-size:13.5px;font-weight:700;color:var(--txt);}
+.ti-esp{font-size:12px;color:var(--txt2);margin-top:2px;}
+.ti-hora{font-size:12px;color:var(--txt2);margin-top:2px;}
+.ti-status{font-size:10px;font-weight:700;letter-spacing:.06em;padding:4px 9px;border-radius:20px;flex-shrink:0;text-transform:uppercase;}
+.st-conf{background:var(--jade-gl);color:var(--jade3);border:1px solid rgba(40,160,122,.2);}
+.st-past{background:rgba(255,255,255,.04);color:var(--txt3);border:1px solid var(--border2);}
+.st-canc{background:rgba(224,122,122,.1);color:var(--rose);border:1px solid rgba(224,122,122,.2);}
+
+/* ═══════════════════════════
+   SALUD
+═══════════════════════════ */
+.stats-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:22px;}
+.stat-card{background:var(--glass2);border:1px solid var(--border2);border-radius:var(--r2);padding:16px;}
+.stat-icon{font-size:22px;margin-bottom:8px;}
+.stat-val{font-family:'Playfair Display',serif;font-size:26px;font-weight:700;color:var(--txt);line-height:1;margin-bottom:3px;}
+.stat-lbl{font-size:11px;color:var(--txt2);font-weight:500;}
+.stat-trend{display:inline-flex;align-items:center;gap:4px;font-size:10.5px;font-weight:700;margin-top:7px;padding:3px 8px;border-radius:20px;}
+.trend-ok{background:var(--jade-gl);color:var(--jade3);}
+.trend-warn{background:var(--gold-gl);color:var(--gold);}
+
+.doc-item{background:var(--glass);border:1px solid var(--border2);border-radius:var(--r2);padding:14px 16px;margin-bottom:9px;display:flex;align-items:center;gap:13px;cursor:pointer;transition:all .2s;}
+.doc-icon{width:42px;height:42px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;}
+.doc-icon.lab{background:rgba(90,159,212,.12);border:1px solid rgba(90,159,212,.2);}
+.doc-icon.img{background:rgba(200,169,106,.1);border:1px solid rgba(200,169,106,.15);}
+.doc-icon.rx{background:var(--jade-gl);border:1px solid rgba(40,160,122,.2);}
+.doc-info{flex:1;}
+.doc-name{font-size:13.5px;font-weight:600;color:var(--txt);}
+.doc-date{font-size:11.5px;color:var(--txt2);margin-top:2px;}
+.doc-status{font-size:10px;font-weight:700;padding:3px 8px;border-radius:20px;flex-shrink:0;}
+.ds-new{background:var(--jade-gl);color:var(--jade3);border:1px solid rgba(40,160,122,.2);}
+.ds-ok{background:var(--glass2);color:var(--txt3);border:1px solid var(--border2);}
+
+/* ═══════════════════════════
+   PERFIL
+═══════════════════════════ */
+.perfil-hdr{padding:52px 22px 20px;text-align:center;}
+.avatar-ring{width:80px;height:80px;border-radius:50%;background:linear-gradient(135deg,var(--jade),var(--jade2));display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-size:28px;font-weight:700;color:#fff;margin:0 auto 14px;position:relative;}
+.avatar-check{position:absolute;bottom:2px;right:2px;width:22px;height:22px;border-radius:50%;background:var(--jade2);border:2px solid var(--ink);display:flex;align-items:center;justify-content:center;font-size:10px;}
+.perfil-name{font-family:'Playfair Display',serif;font-size:22px;font-weight:700;color:var(--txt);margin-bottom:3px;}
+.perfil-sub{font-size:13px;color:var(--txt2);}
+
+.info-card{margin:0 22px 14px;background:var(--glass2);border:1px solid var(--border2);border-radius:var(--r2);overflow:hidden;}
+.info-row{display:flex;align-items:center;justify-content:space-between;padding:13px 16px;border-bottom:1px solid var(--border2);cursor:pointer;transition:background .2s;}
+.info-row:last-child{border:none;}
+.info-row:active{background:var(--glass3);}
+.ir-left{display:flex;align-items:center;gap:11px;}
+.ir-icon{width:32px;height:32px;border-radius:9px;background:var(--glass3);border:1px solid var(--border2);display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;}
+.ir-lbl{font-size:13.5px;font-weight:600;color:var(--txt);}
+.ir-val{font-size:12px;color:var(--txt2);margin-top:1px;}
+.ir-arrow{color:var(--txt3);font-size:16px;}
+.notif-row-item{display:flex;align-items:center;justify-content:space-between;padding:13px 16px;border-bottom:1px solid var(--border2);}
+.toggle{width:42px;height:24px;border-radius:12px;background:var(--jade2);position:relative;cursor:pointer;transition:background .25s;flex-shrink:0;}
+.toggle.off{background:var(--glass3);}
+.toggle::after{content:'';position:absolute;top:3px;width:18px;height:18px;border-radius:50%;background:#fff;transition:left .25s;left:21px;}
+.toggle.off::after{left:3px;}
+.logout-btn{margin:0 22px 30px;background:rgba(224,122,122,.08);border:1px solid rgba(224,122,122,.2);border-radius:var(--r2);padding:14px;font-family:'Plus Jakarta Sans',sans-serif;font-size:13.5px;font-weight:700;color:var(--rose);cursor:pointer;width:calc(100% - 44px);transition:all .2s;}
+
+/* ═══════════════════════════
+   BOOKING SHEET
+═══════════════════════════ */
+.booking-overlay{display:none;position:fixed;inset:0;background:rgba(8,18,13,.88);z-index:200;justify-content:flex-end;flex-direction:column;backdrop-filter:blur(10px);}
+.booking-overlay.open{display:flex;}
+.booking-sheet{background:var(--ink2);border-top:1px solid var(--border);border-radius:26px 26px 0 0;max-height:92vh;overflow-y:auto;animation:sheetUp .35s cubic-bezier(.4,0,.2,1);}
+@keyframes sheetUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.sheet-handle{width:36px;height:4px;border-radius:2px;background:var(--border);margin:12px auto 0;}
+.sheet-hdr{padding:20px 22px 0;display:flex;align-items:center;justify-content:space-between;}
+.sheet-title{font-family:'Playfair Display',serif;font-size:22px;font-weight:700;color:var(--txt);}
+.sheet-close{width:32px;height:32px;border-radius:10px;background:var(--glass2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:16px;color:var(--txt2);cursor:pointer;}
+.sheet-body{padding:18px 22px 36px;}
+
+/* ── SHARED ── */
+.sec{padding:0 22px;margin-bottom:24px;}
+.sec-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+.sec-title{font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--txt2);}
+.sec-link{font-size:12px;font-weight:600;color:var(--jade3);cursor:pointer;}
+
+.lbl{font-size:10.5px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--txt3);margin-bottom:8px;display:block;}
+.inp{width:100%;background:var(--glass2);border:1.5px solid var(--border);border-radius:var(--r2);padding:14px 18px;font-family:'Plus Jakarta Sans',sans-serif;font-size:15px;color:var(--txt);outline:none;-webkit-appearance:none;transition:all .25s;}
+.inp::placeholder{color:var(--txt3);}
+.inp:focus{border-color:var(--jade2);box-shadow:0 0 0 3px rgba(40,160,122,.1);}
+.inp-g{margin-bottom:14px;}
+
+.opts{display:flex;flex-direction:column;gap:9px;}
+.ocard{background:var(--glass);border:1.5px solid var(--border2);border-radius:var(--r2);padding:14px 16px;cursor:pointer;display:flex;align-items:center;gap:13px;transition:all .22s;}
+.ocard.sel{background:var(--jade-gl);border-color:rgba(40,160,122,.35);}
+.oi{width:40px;height:40px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:17px;background:var(--glass2);border:1px solid var(--border2);flex-shrink:0;}
+.ocard.sel .oi{background:rgba(40,160,122,.15);border-color:rgba(40,160,122,.3);}
+.on_{flex:1;}
+.on-name{font-size:14px;font-weight:600;color:var(--txt);}
+.on-sub{font-size:11.5px;color:var(--txt2);margin-top:2px;}
+.ochk{width:22px;height:22px;border-radius:50%;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;transition:all .22s;flex-shrink:0;font-size:11px;}
+.ocard.sel .ochk{background:var(--jade2);border-color:var(--jade2);color:#fff;box-shadow:0 0 8px rgba(40,160,122,.4);}
+
+.cal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+.cal-month-lbl{font-family:'Playfair Display',serif;font-size:20px;font-weight:600;color:var(--txt);}
+.cal-nav{background:var(--glass2);border:1.5px solid var(--border);border-radius:9px;width:32px;height:32px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:15px;color:var(--txt2);transition:all .2s;}
+.cal-nav:disabled{opacity:.25;cursor:not-allowed;}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-bottom:8px;}
+.cal-head{text-align:center;font-size:10px;font-weight:700;color:var(--txt3);letter-spacing:.08em;padding-bottom:7px;}
+.cal-day{aspect-ratio:1;display:flex;flex-direction:column;align-items:center;justify-content:center;border-radius:10px;cursor:pointer;transition:all .18s;position:relative;}
+.cal-day.empty,.cal-day.past,.cal-day.no-slots{cursor:default;}
+.cal-day.past,.cal-day.no-slots{opacity:.2;}
+.cal-day.has-slots{background:rgba(30,107,82,.2);border:1px solid rgba(40,160,122,.25);}
+.cal-day.sel-day{background:linear-gradient(135deg,var(--jade),var(--jade2));box-shadow:0 4px 12px rgba(30,107,82,.5);}
+.cal-day.today-ring::after{content:'';position:absolute;inset:-2px;border-radius:12px;border:1.5px solid var(--gold);}
+.cal-num{font-size:13px;font-weight:600;color:var(--txt2);}
+.cal-day.has-slots .cal-num{color:var(--jade3);}
+.cal-day.sel-day .cal-num{color:#fff;}
+.cal-dot{width:3px;height:3px;border-radius:50%;background:var(--jade3);margin-top:2px;}
+.cal-day.sel-day .cal-dot{background:rgba(255,255,255,.6);}
+
+.slot-doc-card{background:var(--glass);border:1.5px solid var(--border2);border-radius:var(--r2);padding:14px;margin-bottom:10px;transition:all .22s;}
+.slot-doc-card.sel{border-color:rgba(40,160,122,.4);background:rgba(30,107,82,.1);}
+.sdc-head{display:flex;align-items:center;gap:11px;margin-bottom:12px;}
+.sdc-avatar{width:42px;height:42px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:800;color:#fff;font-family:'Playfair Display',serif;flex-shrink:0;}
+.sdc-info{flex:1;}
+.sdc-name{font-size:14px;font-weight:700;color:var(--txt);}
+.sdc-spec{font-size:11.5px;color:var(--txt2);margin-top:2px;}
+.sdc-tag{font-size:9.5px;font-weight:700;letter-spacing:.07em;padding:3px 9px;border-radius:20px;text-transform:uppercase;flex-shrink:0;}
+.tag-g{background:rgba(40,160,122,.15);color:var(--jade3);border:1px solid rgba(40,160,122,.25);}
+.tag-au{background:var(--gold-gl);color:var(--gold);border:1px solid rgba(200,169,106,.2);}
+.slots-inline{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;}
+.sl{background:rgba(255,255,255,.04);border:1.5px solid var(--border2);border-radius:9px;padding:10px 4px;text-align:center;cursor:pointer;transition:all .18s;}
+.sl.taken{opacity:.3;cursor:not-allowed;text-decoration:line-through;}
+.sl.sel-slot{background:linear-gradient(135deg,var(--jade),var(--jade2));border-color:transparent;box-shadow:0 4px 12px rgba(30,107,82,.4);}
+.sl-time{font-size:12px;font-weight:700;color:var(--txt2);}
+.sl.sel-slot .sl-time{color:#fff;}
+
+.copago-box{background:linear-gradient(135deg,rgba(200,169,106,.1),rgba(240,212,138,.06));border:1.5px solid rgba(200,169,106,.2);border-radius:var(--r2);padding:15px 18px;display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
+.copago-lbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--gold);margin-bottom:2px;}
+.copago-note{font-size:11.5px;color:var(--txt2);}
+.copago-amt{font-family:'Playfair Display',serif;font-size:30px;font-weight:700;color:var(--gold2);}
+
+.pay-card{background:var(--glass);border:1.5px solid var(--border2);border-radius:var(--r2);padding:15px 17px;cursor:pointer;transition:all .22s;position:relative;margin-bottom:9px;}
+.pay-card.sel{border-color:rgba(40,160,122,.4);background:rgba(30,107,82,.1);}
+.pay-card-top{display:flex;align-items:center;gap:12px;margin-bottom:3px;}
+.pay-icon{font-size:19px;}
+.pay-name{font-size:13.5px;font-weight:700;color:var(--txt);}
+.pay-desc{font-size:11.5px;color:var(--txt2);line-height:1.5;margin-left:31px;}
+.pay-badge{position:absolute;top:11px;right:13px;font-size:9.5px;font-weight:700;padding:3px 8px;border-radius:20px;background:var(--jade-gl);color:var(--jade3);letter-spacing:.06em;text-transform:uppercase;border:1px solid rgba(40,160,122,.25);}
+.card-form{background:rgba(0,0,0,.15);border-radius:var(--r3);padding:12px;margin-top:9px;display:none;}
+.card-form.on{display:block;}
+.card-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.policy{font-size:11.5px;color:var(--txt2);line-height:1.65;padding:11px 13px;background:var(--glass2);border-radius:var(--r3);border:1px solid var(--border2);margin-bottom:14px;}
+
+.btn-prim{width:100%;padding:16px;border-radius:var(--r2);border:none;font-family:'Plus Jakarta Sans',sans-serif;font-size:14.5px;font-weight:700;background:linear-gradient(135deg,var(--jade),var(--jade2));color:#fff;cursor:pointer;letter-spacing:.03em;box-shadow:0 4px 20px rgba(30,107,82,.4);transition:all .22s;}
+.btn-prim:disabled{opacity:.35;cursor:not-allowed;}
+.btn-sec{width:100%;padding:15px;border-radius:var(--r2);border:1.5px solid var(--border);font-family:'Plus Jakarta Sans',sans-serif;font-size:14px;font-weight:600;background:var(--glass2);color:var(--txt2);cursor:pointer;transition:all .22s;margin-top:10px;}
+
+.suc-wrap{text-align:center;padding:20px 0 28px;}
+.suc-ring{width:90px;height:90px;border-radius:50%;background:linear-gradient(135deg,rgba(30,107,82,.4),rgba(40,160,122,.25));border:1.5px solid rgba(40,160,122,.3);display:flex;align-items:center;justify-content:center;font-size:34px;margin:0 auto 18px;animation:popIn .5s cubic-bezier(.34,1.56,.64,1);}
+@keyframes popIn{from{transform:scale(.4);opacity:0}to{transform:scale(1);opacity:1}}
+.suc-title{font-family:'Playfair Display',serif;font-size:26px;font-weight:700;color:var(--txt);margin-bottom:7px;}
+.suc-sub{font-size:13px;color:var(--txt2);line-height:1.65;margin-bottom:22px;}
+.ticket{background:var(--glass2);border-radius:var(--r2);border:1.5px solid var(--border);padding:18px;text-align:left;margin-bottom:14px;position:relative;overflow:hidden;}
+.ticket::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--jade),var(--jade3),var(--gold));}
+.ticket-num{font-size:10px;text-transform:uppercase;letter-spacing:.12em;color:var(--txt3);margin-bottom:4px;font-weight:700;}
+.ticket-code{font-family:'Playfair Display',serif;font-size:34px;font-weight:700;color:var(--jade3);letter-spacing:.06em;margin-bottom:4px;}
+.ticket hr{border:none;border-top:1px dashed var(--border2);margin:12px 0;}
+.sum-row{display:flex;justify-content:space-between;align-items:flex-start;padding:8px 0;border-bottom:1px solid var(--border2);gap:10px;}
+.sum-row:last-child{border:none;}
+.sum-k{font-size:10.5px;color:var(--txt3);text-transform:uppercase;letter-spacing:.08em;flex-shrink:0;font-weight:600;}
+.sum-v{font-size:13px;font-weight:600;color:var(--txt);text-align:right;}
+.pay-status{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:700;padding:4px 10px;border-radius:20px;margin-top:4px;}
+.ps-paid{background:rgba(30,107,82,.2);color:var(--jade3);border:1px solid rgba(40,160,122,.25);}
+.ps-pending{background:var(--gold-gl);color:var(--gold);border:1px solid rgba(200,169,106,.2);}
+.notif-chip{display:flex;align-items:center;gap:9px;background:var(--glass2);border:1px solid var(--border2);border-radius:var(--r3);padding:11px 13px;margin-bottom:8px;font-size:12.5px;color:var(--txt2);}
+
+.ldots{display:inline-flex;gap:4px;align-items:center;}
+.ldots span{width:5px;height:5px;border-radius:50%;background:currentColor;opacity:.4;animation:blink 1.2s infinite;}
+.ldots span:nth-child(2){animation-delay:.2s;}
+.ldots span:nth-child(3){animation-delay:.4s;}
+@keyframes blink{0%,80%,100%{opacity:.4}40%{opacity:1}}
+.sp{height:16px;}
+.txta{width:100%;background:var(--glass2);border:1.5px solid var(--border);border-radius:var(--r2);padding:13px 15px;font-family:'Plus Jakarta Sans',sans-serif;font-size:14px;color:var(--txt);outline:none;resize:none;min-height:72px;transition:all .25s;}
+.txta::placeholder{color:var(--txt3);}
+.txta:focus{border-color:var(--jade2);}
+.opt-badge{font-size:9.5px;font-weight:700;background:var(--gold-gl);color:var(--gold);padding:2px 7px;border-radius:20px;letter-spacing:.07em;margin-left:6px;text-transform:uppercase;border:1px solid rgba(200,169,106,.2);}
+</style>
+</head>
+<body>
+<div class="amb1"></div><div class="amb2"></div>
+
+<div class="app">
+  <div class="content" id="mainContent">
+
+    <!-- ══════════ HOME ══════════ -->
+    <div class="view active" id="view-home">
+
+      <div class="home-top">
+        <div>
+          <div class="home-greet">Buenas tardes</div>
+          <div class="home-name">Brenda <em>Miani</em></div>
+        </div>
+        <div class="notif-btn" onclick="showNotifs()">
+          🔔<div class="notif-dot"></div>
+        </div>
+      </div>
+
+      <!-- Hero: próximo turno -->
+      <div class="hero-card" id="heroCard">
+        <span class="hero-tag">Próximo turno</span>
+        <div class="hero-doc">Dra. Claudia Benítez</div>
+        <div class="hero-esp">Cardiología Funcional</div>
+        <div class="hero-chips">
+          <div class="hero-chip">📅 Jue 10 de abril</div>
+          <div class="hero-chip">🕙 10:00 hs</div>
+        </div>
+        <div class="hero-actions">
+          <button class="hero-btn hero-btn-p" onclick="openBooking()">Reagendar</button>
+          <button class="hero-btn hero-btn-g" onclick="cancelarTurno()">Cancelar</button>
+        </div>
+      </div>
+
+      <!-- Cards de navegación — 2x2, limpio -->
+      <div class="cards-grid">
+        <div class="nav-card accent-jade" onclick="openBooking()">
+          <div class="nav-card-icon">➕</div>
+          <div>
+            <div class="nav-card-title">Nuevo turno</div>
+            <div class="nav-card-sub">Elegí fecha y médico</div>
+          </div>
+        </div>
+        <div class="nav-card" onclick="switchTab('turnos')">
+          <div class="nav-card-badge">3</div>
+          <div class="nav-card-icon">📅</div>
+          <div>
+            <div class="nav-card-title">Mis turnos</div>
+            <div class="nav-card-sub">Historial y próximos</div>
+          </div>
+        </div>
+        <div class="nav-card accent-blue" onclick="switchTab('salud')">
+          <div class="nav-card-icon">🧪</div>
+          <div>
+            <div class="nav-card-title">Resultados</div>
+            <div class="nav-card-sub">1 nuevo disponible</div>
+          </div>
+        </div>
+        <div class="nav-card accent-gold" onclick="switchTab('perfil')">
+          <div class="nav-card-icon">👤</div>
+          <div>
+            <div class="nav-card-title">Mi perfil</div>
+            <div class="nav-card-sub">Datos y cobertura</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 1 sola novedad destacada -->
+      <div class="single-news" onclick="alert('Ver novedades completas')">
+        <div class="sn-icon">🎁</div>
+        <div style="flex:1">
+          <div class="sn-tag promo">Beneficio</div>
+          <div class="sn-text">2da consulta nutricional sin cargo para afiliados OSDE</div>
+        </div>
+        <div class="sn-arrow">›</div>
+      </div>
+
+    </div>
+
+    <!-- ══════════ TURNOS ══════════ -->
+    <div class="view" id="view-turnos">
+      <div class="page-hdr">
+        <div class="page-title">Mis <em>turnos</em></div>
+        <button class="btn-new" onclick="openBooking()">+ Nuevo</button>
+      </div>
+      <div class="filter-row">
+        <div class="fchip active" onclick="filterTurnos('todos',this)">Todos</div>
+        <div class="fchip" onclick="filterTurnos('proximos',this)">Próximos</div>
+        <div class="fchip" onclick="filterTurnos('pasados',this)">Pasados</div>
+        <div class="fchip" onclick="filterTurnos('cancelados',this)">Cancelados</div>
+      </div>
+      <div style="padding:0 22px" id="turnosList"></div>
+    </div>
+
+    <!-- ══════════ SALUD ══════════ -->
+    <div class="view" id="view-salud">
+      <div class="page-hdr" style="padding-bottom:8px">
+        <div class="page-title">Mi <em>salud</em></div>
+      </div>
+      <div class="sec">
+        <div class="stats-row">
+          <div class="stat-card">
+            <div class="stat-icon">🩸</div>
+            <div class="stat-val">94</div>
+            <div class="stat-lbl">Glucemia mg/dL</div>
+            <div class="stat-trend trend-ok">↓ Normal</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon">💓</div>
+            <div class="stat-val">120/80</div>
+            <div class="stat-lbl">Presión arterial</div>
+            <div class="stat-trend trend-ok">✓ Óptima</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon">⚖️</div>
+            <div class="stat-val">67<span style="font-size:14px"> kg</span></div>
+            <div class="stat-lbl">Peso registrado</div>
+            <div class="stat-trend trend-warn">↑ +1.5 kg</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon">🏥</div>
+            <div class="stat-val">12</div>
+            <div class="stat-lbl">Consultas totales</div>
+            <div class="stat-trend trend-ok">4 este año</div>
+          </div>
+        </div>
+      </div>
+      <div class="sec">
+        <div class="sec-hdr">
+          <span class="sec-title">Documentos y estudios</span>
+          <span class="sec-link">Ver todos</span>
+        </div>
+        <div class="doc-item"><div class="doc-icon lab">🧪</div><div class="doc-info"><div class="doc-name">Análisis de sangre completo</div><div class="doc-date">26 mar 2025 · Lab. Ceiba</div></div><span class="doc-status ds-new">Nuevo</span></div>
+        <div class="doc-item"><div class="doc-icon img">🫀</div><div class="doc-info"><div class="doc-name">Ecocardiograma Doppler</div><div class="doc-date">12 feb 2025 · Imágenes</div></div><span class="doc-status ds-ok">Visto</span></div>
+        <div class="doc-item"><div class="doc-icon rx">💊</div><div class="doc-info"><div class="doc-name">Receta — Bisoprolol 5mg</div><div class="doc-date">8 ene 2025 · Dra. Benítez</div></div><span class="doc-status ds-ok">Visto</span></div>
+        <div class="doc-item"><div class="doc-icon lab">🧪</div><div class="doc-info"><div class="doc-name">Perfil lipídico + TSH</div><div class="doc-date">14 nov 2024 · Laboratorio</div></div><span class="doc-status ds-ok">Visto</span></div>
+        <div class="doc-item"><div class="doc-icon img">🫁</div><div class="doc-info"><div class="doc-name">Radiografía de tórax</div><div class="doc-date">3 oct 2024 · Imágenes</div></div><span class="doc-status ds-ok">Visto</span></div>
+      </div>
+    </div>
+
+    <!-- ══════════ PERFIL ══════════ -->
+    <div class="view" id="view-perfil">
+      <div class="perfil-hdr">
+        <div class="avatar-ring">BM<div class="avatar-check">✓</div></div>
+        <div class="perfil-name">Brenda Miani</div>
+        <div class="perfil-sub">DNI 28.901.234 · OSDE 310</div>
+      </div>
+      <div class="info-card">
+        <div class="info-row"><div class="ir-left"><div class="ir-icon">👤</div><div><div class="ir-lbl">Datos personales</div><div class="ir-val">Miani, Brenda L. · 34 años</div></div></div><span class="ir-arrow">›</span></div>
+        <div class="info-row"><div class="ir-left"><div class="ir-icon">🏥</div><div><div class="ir-lbl">Cobertura médica</div><div class="ir-val">OSDE Binario 310</div></div></div><span class="ir-arrow">›</span></div>
+        <div class="info-row"><div class="ir-left"><div class="ir-icon">📱</div><div><div class="ir-lbl">WhatsApp</div><div class="ir-val">+54 9 11 4455-6677</div></div></div><span class="ir-arrow">›</span></div>
+        <div class="info-row" style="border:none"><div class="ir-left"><div class="ir-icon">✉️</div><div><div class="ir-lbl">Email</div><div class="ir-val">b.miani@gmail.com</div></div></div><span class="ir-arrow">›</span></div>
+      </div>
+      <div class="info-card">
+        <div class="notif-row-item"><div class="ir-left"><div class="ir-icon">🔔</div><div><div class="ir-lbl">Recordatorio de turno</div><div class="ir-val">24 hs antes por WhatsApp</div></div></div><div class="toggle" id="tog1" onclick="toggleSwitch('tog1')"></div></div>
+        <div class="notif-row-item"><div class="ir-left"><div class="ir-icon">📋</div><div><div class="ir-lbl">Resultados disponibles</div><div class="ir-val">Notificación en app</div></div></div><div class="toggle" id="tog2" onclick="toggleSwitch('tog2')"></div></div>
+        <div class="notif-row-item" style="border:none"><div class="ir-left"><div class="ir-icon">📣</div><div><div class="ir-lbl">Novedades y promos</div><div class="ir-val">Email semanal</div></div></div><div class="toggle off" id="tog3" onclick="toggleSwitch('tog3')"></div></div>
+      </div>
+      <div class="info-card">
+        <div class="info-row"><div class="ir-left"><div class="ir-icon">🔒</div><div><div class="ir-lbl">Cambiar contraseña</div></div></div><span class="ir-arrow">›</span></div>
+        <div class="info-row" style="border:none"><div class="ir-left"><div class="ir-icon">❓</div><div><div class="ir-lbl">Ayuda y soporte</div></div></div><span class="ir-arrow">›</span></div>
+      </div>
+      <button class="logout-btn" onclick="logout()">Cerrar sesión</button>
+    </div>
+
+  </div>
+
+  <!-- TAB BAR -->
+  <div class="tabbar">
+    <button class="tab active" id="tab-home" onclick="switchTab('home')"><span class="tab-icon">🏠</span><span class="tab-lbl">Inicio</span><div class="tab-pip"></div></button>
+    <button class="tab" id="tab-turnos" onclick="switchTab('turnos')"><span class="tab-icon">📅</span><span class="tab-lbl">Turnos</span><div class="tab-pip"></div></button>
+    <button class="tab" id="tab-salud" onclick="switchTab('salud')"><span class="tab-icon">🩺</span><span class="tab-lbl">Salud</span><div class="tab-pip"></div></button>
+    <button class="tab" id="tab-perfil" onclick="switchTab('perfil')"><span class="tab-icon">👤</span><span class="tab-lbl">Perfil</span><div class="tab-pip"></div></button>
+  </div>
+</div>
+
+<!-- BOOKING SHEET -->
+<div class="booking-overlay" id="bookingOverlay" onclick="closeBookingOutside(event)">
+  <div class="booking-sheet" id="bookingSheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-hdr">
+      <div class="sheet-title" id="sheetTitle">Nuevo turno</div>
+      <div class="sheet-close" onclick="closeBooking()">✕</div>
+    </div>
+    <div class="sheet-body" id="sheetBody"></div>
+  </div>
+</div>
+
+<script>
+// ── DATA ──
+const PATOLOGIAS=[
+  {id:"cardio",nombre:"Cardiología Funcional",     icon:"❤️", sub:"Trastornos del ritmo y función cardíaca"},
+  {id:"neuro", nombre:"Neurología Cognitiva",      icon:"🧠", sub:"Cefalea, deterioro cognitivo, vértigo"},
+  {id:"reum",  nombre:"Reumatología Inmune",       icon:"🦴", sub:"Artritis, lupus, fibromialgia"},
+  {id:"endoc", nombre:"Endocrinología Metabólica", icon:"⚗️", sub:"Diabetes, tiroides, obesidad"},
+  {id:"gastro",nombre:"Gastroenterología Avanzada",icon:"🫁", sub:"Colon irritable, RGE, hepatopatías"},
+];
+const MEDICOS={
+  cardio:[{id:"m1",nombre:"Dr. Alejandro Ferreyra",ini:"AF",color:"#1e6b52",dias:[2,4],tag:"Alta demanda",tagT:"au"},{id:"m2",nombre:"Dra. Claudia Benítez",ini:"CB",color:"#28a07a",dias:[1,3,5],tag:"Disponible",tagT:"g"},{id:"m3",nombre:"Dr. Matías Herrera",ini:"MH",color:"#4a5568",dias:[3,5],tag:"Disponible",tagT:"g"}],
+  neuro: [{id:"m4",nombre:"Dra. Valeria Suárez",  ini:"VS",color:"#553c9a",dias:[1,3],tag:"Alta demanda",tagT:"au"},{id:"m5",nombre:"Dr. Ignacio Ponce",   ini:"IP",color:"#28a07a",dias:[2,4],tag:"Disponible",tagT:"g"}],
+  reum:  [{id:"m7",nombre:"Dr. Federico Rojas",   ini:"FR",color:"#8b4513",dias:[1,5],tag:"Disponible",  tagT:"g"}, {id:"m8",nombre:"Dra. Luciana Castro",  ini:"LC",color:"#1e6b52",dias:[2,4],tag:"Alta demanda",tagT:"au"}],
+  endoc: [{id:"m10",nombre:"Dra. Florencia Ibáñez",ini:"FI",color:"#c0392b",dias:[1,3],tag:"Disponible", tagT:"g"},{id:"m11",nombre:"Dr. Santiago Ríos",  ini:"SR",color:"#1e6b52",dias:[2,4],tag:"Alta demanda",tagT:"au"}],
+  gastro:[{id:"m13",nombre:"Dr. Hernán Molina",   ini:"HM",color:"#28a07a",dias:[1,3,5],tag:"Disponible",tagT:"g"},{id:"m14",nombre:"Dra. Natalia Vega",   ini:"NV",color:"#8b4513",dias:[2,4],tag:"Alta demanda",tagT:"au"}],
+};
+const COPAGOS={osde:{cardio:4200,neuro:3800,reum:4500,endoc:3600,gastro:3900},swiss:{cardio:5500,neuro:5200,reum:6000,endoc:5000,gastro:5300},galeno:{cardio:3800,neuro:3500,reum:4000,endoc:3300,gastro:3600},ioma:{cardio:2200,neuro:2000,reum:2500,endoc:1900,gastro:2100},medife:{cardio:4800,neuro:4400,reum:5000,endoc:4200,gastro:4600},particular:{cardio:18000,neuro:16000,reum:20000,endoc:15000,gastro:17000}};
+const ALL_SLOTS=["08:00","08:30","09:00","09:30","10:00","10:30","11:00","11:30","14:00","14:30","15:00","15:30","16:00","16:30","17:00"];
+const MONTHS_ES=["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
+const DAYS_ES=["Dom","Lun","Mar","Mié","Jue","Vie","Sáb"];
+const TAKEN_CACHE={};
+function getTaken(d,k){const key=d+'_'+k;if(!TAKEN_CACHE[key]){const n=3+Math.floor(Math.random()*6);const t=new Set();while(t.size<n)t.add(Math.floor(Math.random()*ALL_SLOTS.length));TAKEN_CACHE[key]=t;}return TAKEN_CACHE[key];}
+
+// ── TURNOS DATA ──
+const MESES=["ene","feb","mar","abr","may","jun","jul","ago","sep","oct","nov","dic"];
+const TURNOS=[
+  {id:"CEI-8821",doc:"Dra. Claudia Benítez",    esp:"Cardiología Funcional",      dia:10,mes:3, hora:"10:00",tipo:"upcoming"},
+  {id:"CEI-6540",doc:"Dr. Santiago Ríos",       esp:"Endocrinología Metabólica",  dia:18,mes:3, hora:"09:30",tipo:"upcoming"},
+  {id:"CEI-5102",doc:"Dra. Florencia Ibáñez",   esp:"Endocrinología Metabólica",  dia:25,mes:3, hora:"11:00",tipo:"upcoming"},
+  {id:"CEI-3312",doc:"Dra. Valeria Suárez",     esp:"Neurología Cognitiva",       dia:8, mes:2, hora:"11:00",tipo:"past"},
+  {id:"CEI-2201",doc:"Dr. Alejandro Ferreyra",  esp:"Cardiología Funcional",      dia:15,mes:1, hora:"08:30",tipo:"past"},
+  {id:"CEI-1984",doc:"Dra. Luciana Castro",     esp:"Reumatología Inmune",        dia:22,mes:11,hora:"16:00",tipo:"cancelled"},
+  {id:"CEI-0923",doc:"Dr. Hernán Molina",       esp:"Gastroenterología Avanzada", dia:5, mes:10,hora:"14:30",tipo:"past"},
+];
+
+// ── BOOKING STATE ──
+let B={step:'pat',pat:null,patNombre:null,selDate:null,selDateLabel:null,calYear:null,calMonth:null,docId:null,docNombre:null,docColor:null,slot:null,slotLabel:null,copago:null,payMethod:null};
+
+// ── TABS ──
+function switchTab(name){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.getElementById('tab-'+name).classList.add('active');
+  document.getElementById('view-'+name).classList.add('active');
+  document.getElementById('mainContent').scrollTop=0;
+  if(name==='turnos')renderTurnos('todos');
+}
+
+// ── TURNOS ──
+function renderTurnos(f){
+  const list=document.getElementById('turnosList');list.innerHTML='';
+  const items=TURNOS.filter(t=>f==='todos'||(f==='proximos'&&t.tipo==='upcoming')||(f==='pasados'&&t.tipo==='past')||(f==='cancelados'&&t.tipo==='cancelled'));
+  if(!items.length){list.innerHTML='<p style="color:var(--txt2);font-size:13px;padding:8px 0">No hay turnos en esta categoría.</p>';return;}
+  const sm={upcoming:['st-conf','Confirmado'],past:['st-past','Realizado'],cancelled:['st-canc','Cancelado']};
+  items.forEach(t=>{
+    const [sc,sl]=sm[t.tipo];
+    const el=document.createElement('div');el.className=`turno-item ${t.tipo}`;
+    el.innerHTML=`<div class="ti-date"><div class="ti-day">${t.dia}</div><div class="ti-mon">${MESES[t.mes]}</div></div><div class="ti-sep"></div><div class="ti-info"><div class="ti-doc">${t.doc}</div><div class="ti-esp">${t.esp}</div><div class="ti-hora">🕐 ${t.hora} hs · ${t.id}</div></div><div class="ti-status ${sc}">${sl}</div>`;
+    list.appendChild(el);
+  });
+}
+function filterTurnos(f,el){
+  document.querySelectorAll('.fchip').forEach(c=>c.classList.remove('active'));
+  el.classList.add('active');renderTurnos(f);
+}
+
+// ── BOOKING ──
+function openBooking(){
+  B={step:'pat',pat:null,patNombre:null,selDate:null,selDateLabel:null,calYear:null,calMonth:null,docId:null,docNombre:null,docColor:null,slot:null,slotLabel:null,copago:3900,payMethod:null};
+  document.getElementById('bookingOverlay').classList.add('open');
+  renderStep('pat');
+}
+function closeBooking(){document.getElementById('bookingOverlay').classList.remove('open');}
+function closeBookingOutside(e){if(e.target===document.getElementById('bookingOverlay'))closeBooking();}
+function cancelarTurno(){if(confirm('¿Cancelar turno del Jue 10 de abril con Dra. Benítez?'))alert('Turno cancelado. Sin cargo por cancelación anticipada.');}
+function showNotifs(){alert('🔔 Notificaciones\n\n• Análisis del 26/03 disponibles para descargar\n• Semana Santa: atención reducida 18–21 de abril');}
+function toggleSwitch(id){document.getElementById(id).classList.toggle('off');}
+function logout(){if(confirm('¿Cerrar sesión?'))alert('Sesión cerrada.');}
+
+function renderStep(step){
+  B.step=step;
+  const body=document.getElementById('sheetBody');
+  const title=document.getElementById('sheetTitle');
+  body.innerHTML='';
+
+  if(step==='pat'){
+    title.textContent='¿Qué especialidad?';
+    const opts=document.createElement('div');opts.className='opts';
+    PATOLOGIAS.forEach(pat=>{
+      const c=mkCard(pat.icon,pat.nombre,pat.sub);
+      c.onclick=()=>{B.pat=pat.id;B.patNombre=pat.nombre;markSel(opts,c);setTimeout(()=>{const t=new Date();B.calYear=t.getFullYear();B.calMonth=t.getMonth();renderStep('cal');},160);};
+      opts.appendChild(c);
+    });
+    body.appendChild(opts);
+  }
+  else if(step==='cal'){
+    title.textContent='Elegí el día';
+    body.innerHTML=buildCalHTML();addCalClicks();
+  }
+  else if(step==='slots'){
+    title.textContent=B.selDateLabel;
+    body.innerHTML=buildSlotsHTML();
+    body.innerHTML+=`<div class="inp-g" style="margin-top:8px"><label class="lbl">Motivo <span class="opt-badge">Opcional</span></label><textarea id="motivoInp" class="txta" placeholder="Describí brevemente el motivo…"></textarea></div><button class="btn-prim" id="btnSlot" disabled onclick="renderStep('pago')">Continuar al pago</button>`;
+  }
+  else if(step==='pago'){
+    title.textContent='Método de pago';
+    body.innerHTML=`
+    <div class="copago-box"><div><div class="copago-lbl">Copago</div><div class="copago-note">${B.patNombre||''}</div></div><div class="copago-amt">$${(B.copago||0).toLocaleString('es-AR')}</div></div>
+    <div class="pay-card" id="pc-card" onclick="selPay('card')"><div class="pay-badge">Instantáneo</div><div class="pay-card-top"><span class="pay-icon">💳</span><span class="pay-name">Tarjeta de crédito / débito</span></div><div class="pay-desc">Visa, Mastercard, Naranja X</div>
+      <div class="card-form" id="cardForm">
+        <div class="inp-g"><label class="lbl">Número</label><input type="text" class="inp" placeholder="•••• •••• •••• ••••" inputmode="numeric" maxlength="19" oninput="fmtCard(this)"></div>
+        <div class="card-row"><div class="inp-g"><label class="lbl">Vencimiento</label><input type="text" class="inp" placeholder="MM/AA" inputmode="numeric" maxlength="5"></div><div class="inp-g"><label class="lbl">CVV</label><input type="text" class="inp" placeholder="•••" inputmode="numeric" maxlength="4"></div></div>
+      </div>
+    </div>
+    <div class="pay-card" id="pc-mp" onclick="selPay('mp')"><div class="pay-badge">Instantáneo</div><div class="pay-card-top"><span class="pay-icon">🔵</span><span class="pay-name">Mercado Pago</span></div><div class="pay-desc">Saldo, QR o app</div></div>
+    <div class="pay-card" id="pc-cash" onclick="selPay('cash')"><div class="pay-card-top"><span class="pay-icon">💵</span><span class="pay-name">Efectivo en recepción</span></div><div class="pay-desc">Abonás el día de la consulta</div></div>
+    <div class="policy">📋 Cancelación sin cargo hasta 24 hs antes.</div>
+    <button class="btn-prim" id="btnPay" disabled onclick="confirmar()">Confirmar turno</button><div class="sp"></div>`;
+  }
+  else if(step==='success'){
+    title.textContent='¡Listo!';
+    const code='CEI-'+Math.floor(1000+Math.random()*9000);
+    const isPaid=B.payMethod!=='cash';
+    body.innerHTML=`<div class="suc-wrap">
+      <div class="suc-ring">${isPaid?'✅':'📋'}</div>
+      <div class="suc-title">${isPaid?'¡Turno confirmado!':'Turno reservado'}</div>
+      <div class="suc-sub">${isPaid?`Copago pagado. Turno con ${B.docNombre}.`:`Reservado. Abonás $${(B.copago||0).toLocaleString('es-AR')} en recepción.`}</div>
+      <div class="ticket">
+        <div class="ticket-num">Código de turno</div>
+        <div class="ticket-code">${code}</div>
+        <div>${isPaid?'<div class="pay-status ps-paid">✓ Pago confirmado</div>':'<div class="pay-status ps-pending">⏳ Pago en recepción</div>'}</div>
+        <hr>
+        <div class="sum-row"><span class="sum-k">Médico</span><span class="sum-v">${B.docNombre||'—'}</span></div>
+        <div class="sum-row"><span class="sum-k">Fecha</span><span class="sum-v">${B.slotLabel||'—'}</span></div>
+        <div class="sum-row" style="border:none"><span class="sum-k">Copago</span><span class="sum-v">$${(B.copago||0).toLocaleString('es-AR')}</span></div>
+      </div>
+      <div class="notif-chip">📲 Confirmación enviada a tu WhatsApp</div>
+      <div class="notif-chip">🔔 Recordatorio 24 hs antes del turno</div>
+      <button class="btn-sec" onclick="closeBooking();switchTab('turnos')">Ver mis turnos</button>
+    </div>`;
+  }
+  document.getElementById('bookingSheet').scrollTop=0;
+}
+
+function buildCalHTML(){
+  const today=new Date();today.setHours(0,0,0,0);
+  const y=B.calYear,m=B.calMonth;
+  const firstDay=new Date(y,m,1).getDay();
+  const offset=(firstDay===0)?6:firstDay-1;
+  const dim=new Date(y,m+1,0).getDate();
+  const docs=MEDICOS[B.pat]||[];
+  const diasOk=new Set(docs.flatMap(d=>d.dias));
+  let h=`<div class="cal-header">
+    <button class="cal-nav" id="calPrev" onclick="calNavB(-1)" ${(y===today.getFullYear()&&m<=today.getMonth())?'disabled':''}>‹</button>
+    <span class="cal-month-lbl">${MONTHS_ES[m]} ${y}</span>
+    <button class="cal-nav" onclick="calNavB(1)">›</button>
+  </div>
+  <div style="display:flex;gap:12px;margin-bottom:12px">
+    <div style="display:flex;align-items:center;gap:5px;font-size:11.5px;color:var(--txt2)"><div style="width:7px;height:7px;border-radius:50%;background:var(--jade3)"></div>Con disponibilidad</div>
+  </div>
+  <div class="cal-grid">${'LMMJVSD'.split('').map(d=>`<div class="cal-head">${d}</div>`).join('')}`;
+  for(let i=0;i<offset;i++)h+=`<div class="cal-day empty"></div>`;
+  for(let d=1;d<=dim;d++){
+    const date=new Date(y,m,d);const dow=date.getDay();
+    const isPast=date<today;const isWE=dow===0||dow===6;
+    const hasSlots=!isPast&&!isWE&&diasOk.has(dow);
+    const dk=`${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const isSel=B.selDate===dk;const isToday=date.getTime()===today.getTime();
+    let cls='cal-day';
+    if(isPast||isWE)cls+=' past';else if(hasSlots)cls+=' has-slots';else cls+=' no-slots';
+    if(isSel)cls+=' sel-day';if(isToday)cls+=' today-ring';
+    h+=`<div class="${cls}" data-date="${dk}" data-dow="${dow}" data-d="${d}"><span class="cal-num">${d}</span>${hasSlots?'<div class="cal-dot"></div>':''}</div>`;
+  }
+  h+=`</div><div class="sp"></div>`;
+  return h;
+}
+function addCalClicks(){
+  document.querySelectorAll('.cal-day.has-slots').forEach(el=>{
+    el.onclick=()=>{
+      const dow=+el.dataset.dow,d=+el.dataset.d,m=B.calMonth;
+      B.selDate=el.dataset.date;
+      B.selDateLabel=`${DAYS_ES[dow]} ${d} de ${MONTHS_ES[m]}`;
+      renderStep('slots');
+    };
+  });
+}
+function calNavB(dir){
+  B.calMonth+=dir;
+  if(B.calMonth>11){B.calMonth=0;B.calYear++;}
+  if(B.calMonth<0){B.calMonth=11;B.calYear--;}
+  document.getElementById('sheetBody').innerHTML=buildCalHTML();addCalClicks();
+}
+
+function buildSlotsHTML(){
+  const dow=new Date(B.selDate+'T12:00:00').getDay();
+  const docs=(MEDICOS[B.pat]||[]).filter(d=>d.dias.includes(dow));
+  if(!docs.length)return'<p style="color:var(--txt2);font-size:13px">No hay profesionales disponibles. Probá otro día.</p>';
+  return docs.map(doc=>{
+    const taken=getTaken(doc.id,B.selDate);
+    const free=ALL_SLOTS.filter((_,i)=>!taken.has(i)).length;
+    const slots=ALL_SLOTS.map((t,i)=>{
+      const tk=taken.has(i);
+      return `<div class="sl${tk?' taken':''}" onclick="selSlot(this,'${doc.id}','${doc.nombre.replace(/'/g,"\\'")}','${doc.color}','${t}')"><div class="sl-time">${t}</div></div>`;
+    }).join('');
+    return `<div class="slot-doc-card" id="sdc_${doc.id}"><div class="sdc-head"><div class="sdc-avatar" style="background:${doc.color}">${doc.ini}</div><div class="sdc-info"><div class="sdc-name">${doc.nombre}</div><div class="sdc-spec">${free} turnos libres</div></div><span class="sdc-tag tag-${doc.tagT}">${doc.tag}</span></div><div class="slots-inline">${slots}</div></div>`;
+  }).join('');
+}
+function selSlot(el,docId,docNombre,docColor,time){
+  if(el.classList.contains('taken'))return;
+  document.querySelectorAll('.sl:not(.taken)').forEach(s=>s.classList.remove('sel-slot'));
+  document.querySelectorAll('.slot-doc-card').forEach(c=>c.classList.remove('sel'));
+  el.classList.add('sel-slot');document.getElementById('sdc_'+docId)?.classList.add('sel');
+  B.docId=docId;B.docNombre=docNombre;B.docColor=docColor;B.slot=time;B.slotLabel=`${B.selDateLabel} · ${time} hs`;
+  const btn=document.getElementById('btnSlot');if(btn)btn.disabled=false;
+}
+function selPay(method){
+  B.payMethod=method;
+  ['pc-card','pc-mp','pc-cash'].forEach(id=>document.getElementById(id)?.classList.remove('sel'));
+  document.getElementById('pc-'+method)?.classList.add('sel');
+  document.getElementById('cardForm')?.classList.toggle('on',method==='card');
+  const btn=document.getElementById('btnPay');if(btn)btn.disabled=false;
+}
+function fmtCard(inp){let v=inp.value.replace(/\D/g,'');v=v.match(/.{1,4}/g)?.join(' ')||v;inp.value=v;}
+function confirmar(){
+  const btn=document.getElementById('btnPay');if(!btn)return;
+  btn.innerHTML='<span class="ldots"><span></span><span></span><span></span></span>';btn.disabled=true;
+  setTimeout(()=>renderStep('success'),1600);
+}
+
+function mkCard(icon,name,sub){
+  const el=document.createElement('div');el.className='ocard';
+  el.innerHTML=`<div class="oi">${icon}</div><div class="on_"><div class="on-name">${name}</div><div class="on-sub">${sub}</div></div><div class="ochk"></div>`;
+  return el;
+}
+function markSel(parent,el){
+  parent.querySelectorAll('.ocard').forEach(c=>{c.classList.remove('sel');c.querySelector('.ochk').innerHTML='';});
+  el.classList.add('sel');el.querySelector('.ochk').innerHTML='✓';
+}
+
+// Init
+renderTurnos('todos');
+</script>
+</body>
+</html>
